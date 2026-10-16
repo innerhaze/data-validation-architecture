@@ -56,7 +56,7 @@ The order also means that each layer only sees defects the earlier layers could 
 
 **Consolidated findings pass.** Rather than ask the model to review each column independently (which produces N independent calls and inconsistent reasoning across them), the value-level layer runs a single model pass that sees all column findings together and returns one coherent summary. One call instead of many, and the reviewer can see cross-column patterns that per-column calls would miss.
 
-**Port fixes bidirectionally when the system migrates.** The stack has moved between code repositories twice. When a bug fix landed in the pre-migration code shortly before a planned migration, it was explicitly ported to the post-migration code and the two commits reference each other. The alternative — "fix it in the new place, the old place is going away" — leaves the old code wrong for the window between fix and cutover.
+**Port fixes bidirectionally when the system migrates.** During a migration between code repositories, bug fixes landed in the pre-migration code shortly before cutover were explicitly ported to the post-migration code within the layers I owned, with each pair of commits referencing the other. The alternative — "fix it in the new place, the old place is going away" — leaves the old code wrong for the window between fix and cutover.
 
 **A decision taken against: wiring the congruence layer as a hard gate.** The three-way congruence layer runs as an auditor-run tool, not as a build-time hard gate. The reason is that a congruence failure usually means "re-check the state of the database" rather than "block this delivery" — the delivery is often correct and the database state has drifted. A hard gate here would mostly block correct deliveries.
 
@@ -75,3 +75,25 @@ The classes below are the ones this architecture is designed to catch. Each is a
 This is not a schema registry. It does not provide a general-purpose validation DSL. It describes how to organise validation work, not how to build the validator library.
 
 This is also not a monitoring layer. The checks are gates, not observability. A monitoring layer is a reasonable thing to add on top, but it answers a different question ("has the data drifted over time?") than the one the gate layers answer ("is this specific delivery correct?").
+
+## Scope of my contribution
+
+This write-up describes a validation stack I helped operate and expand over
+roughly two years at a location-data company. Not every layer is my design.
+
+The field-level invariants layer (1) and the schema conformance layer (2)
+were authored by a colleague on the pre-migration codebase, before I began
+working on the stack. My contributions to those two layers were targeted
+rule additions, a default-on flip on the conformance check, and ports
+across the code migration.
+
+The value-level distribution profiling layer (3), the post-cleanup pattern
+scan (4), and the three-way congruence check (5) are my design and
+implementation. The pattern-scan layer was later extracted into a
+standalone methodology package I own, which the architecture notes describe
+in its post-cleanup role.
+
+The ordering, the deterministic-rules-before-model principle, the
+default-on decision, the bidirectional-port rule during migrations, and
+the decision against hard-gating the congruence layer are all choices I
+made across the stack regardless of who authored the layer.
