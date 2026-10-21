@@ -79,7 +79,7 @@ This is also not a monitoring layer. The checks are gates, not observability. A 
 ## Scope of my contribution
 
 This write-up describes a validation stack I helped operate and expand over
-roughly two years at a location-data company. Not every layer is my design.
+roughly fifteen months at a location-data company. Not every layer is my design.
 
 The field-level invariants layer (1) and the schema conformance layer (2)
 were authored by a colleague on the pre-migration codebase, before I began
